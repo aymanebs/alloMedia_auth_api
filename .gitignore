@@ -1,8 +1,6 @@
 # Node.js
 node_modules/
 
-
-
 # IDE specific files
 .vscode/
 .idea/
@@ -12,15 +10,6 @@ node_modules/
 # OS generated files
 .DS_Store
 Thumbs.db
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Optional REPL history
-.node_repl_history
 
 # Environment variables
 .env
