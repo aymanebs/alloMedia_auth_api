@@ -104,4 +104,41 @@
         }
     };
 
-    module.exports = { register, verifyEmail };
+
+ /////////////// Login method
+
+const login = async (req, res) => {
+
+    const { email, password } = req.body;
+  
+    try {
+
+      // Check if user exists
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(400).json({ message: 'Invalid email or password' });
+      }
+  
+      // Check if the email is verified 
+      if (!user.emailIsVerified) {
+        return res.status(403).json({ message: 'Please verify your email before logging in' });
+      }
+  
+      // Compare passwords
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(400).json({ message: 'Invalid email or password' });
+      }
+  
+      // JWT token
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+  
+      // Send token  to the client
+      res.status(200).json({ token, message: 'Login successful' });
+  
+    } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
+
+  module.exports = { register, verifyEmail, login };
