@@ -10,17 +10,20 @@ jest.mock("bcryptjs");
 jest.mock("jsonwebtoken");
 jest.mock("../../services/mailing"); 
 
+// Mock environment variable
+process.env.JWT_SECRET = "mockedSecret"; 
+
 describe("Register function", () => {
   beforeEach(() => {
-    
+    // Silence console.error
+    jest.spyOn(console, 'error').mockImplementation(() => {}); 
     jest.clearAllMocks();
   });
 
   it("should successfully register a user", async () => {
-   
     const req = httpMocks.createRequest({
       method: "POST",
-       body:{name:"Ahmad",email:"ahmad@gmail.com",password:"aA12345678",address:"location",phone:"2128766546"}
+      body: {name: "Ahmad", email: "ahmad@gmail.com", password: "aA12345678", address: "location", phone: "2128766546"},
     });
     const res = httpMocks.createResponse();
 
@@ -29,14 +32,13 @@ describe("Register function", () => {
     User.mockImplementation(() => ({
       save: jest.fn().mockResolvedValue({
         _id: "userId",
-        name:"Ahmad",
-        email:"ahmad@gmail.com",
-        address:"location",
-        phone:"2128766546"
+        name: "Ahmad",
+        email: "ahmad@gmail.com",
+        address: "location",
+        phone: "2128766546",
       }),
     }));
 
- 
     jwt.sign.mockReturnValue("mockedToken");
 
     sendingMail.mockResolvedValue();
@@ -46,19 +48,16 @@ describe("Register function", () => {
     expect(res.statusCode).toBe(201); 
     const data = res._getData();
     expect(data).toEqual({
-        _id: "userId",
-        name:"Ahmad",
-        email:"ahmad@gmail.com",
-        address:"location",
-        phone:"2128766546"
+      _id: "userId",
+      name: "Ahmad",
+      email: "ahmad@gmail.com",
+      address: "location",
+      phone: "2128766546",
     });
 
-    
-    expect(jwt.sign).toHaveBeenCalledWith({ userId: "userId" }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-   
+    expect(jwt.sign).toHaveBeenCalledWith({ userId: "userId" }, "mockedSecret", { expiresIn: "1h" });
     expect(sendingMail).toHaveBeenCalledWith(expect.objectContaining({
-      to: "john@example.com",
+      to: "ahmad@gmail.com",
       subject: "Account Verification Link",
     }));
   });
@@ -66,7 +65,7 @@ describe("Register function", () => {
   it("should return 500 if user registration fails", async () => {
     const req = httpMocks.createRequest({
       method: "POST",
-      body: {name:"Ahmad",email:"ahmad@gmail.com",password:"aA12345678",address:"location",phone:"2128766546"},
+      body: {name: "Ahmad", email: "ahmad@gmail.com", password: "aA12345678", address: "location", phone: "2128766546"},
     });
     const res = httpMocks.createResponse();
 
@@ -79,7 +78,7 @@ describe("Register function", () => {
     await register(req, res);
 
     expect(res.statusCode).toBe(500);
-    const data = res._getData();
+    const data = JSON.parse(res._getData());
     expect(data).toEqual({ error: "Registration failed" });
   });
 });
