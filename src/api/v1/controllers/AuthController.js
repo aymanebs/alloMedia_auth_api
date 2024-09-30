@@ -3,6 +3,9 @@
     const jwt = require("jsonwebtoken");
     const joi = require("joi");
     const { sendingMail } = require("../services/mailing");
+    const requestOtp = require("../helpers/requestOtp");
+
+    
 
     //////////////// Register method
 
@@ -129,16 +132,59 @@ const login = async (req, res) => {
       if (!isPasswordValid) {
         return res.status(400).json({ message: 'Invalid email or password' });
       }
-  
-      // JWT token
-      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-  
-      // Send token  to the client
-      res.status(200).json({ token, message: 'Login successful' });
+      
+
+      //Request otp 
+      const otp = await requestOtp(req);
+
+      
+      // Respond with a message prompting user to enter OTP
+      res.status(200).json({ message: 'OTP has been sent to your email. Please verify to complete login.',userId:user._id });
+      
+
   
     } catch (error) {
+      console.error(error);
       res.status(500).json({ message: 'Server error' });
     }
   };
 
-  module.exports = { register, verifyEmail, login };
+
+  ////////////////// Verify Otp method
+
+  const verifyOtp = (req,res) =>{
+
+    const { userId,otp } = req.body;
+    try{
+        // Checking Otp and it's expiration
+        if(! req.session.otp || Date.now() > req.session.otpExpires){
+            req.status(400).json({message:"otp not valid"});
+        }
+
+        // Checking if entered otp matches the stored one
+        if(otp != req.session.otp){
+            res.status(400).json({message:"entered otp invalid"});
+        }
+
+        // JWT token
+        const token = jwt.sign({ userId}, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+        // dleteing session if entred otp matches
+        delete req.session.otp;
+        delete req.session.otpExpires;
+
+        // Send token  to the client
+        res.status(200).json({ token, message: 'Login successful' });
+    }
+    catch(error){
+        console.error("Error while verifying otp");
+        res.status(500).json({message:"Failed to verify otp"});
+    }
+}
+
+
+  module.exports = { register, verifyEmail, login, verifyOtp };
+
+
+
+
