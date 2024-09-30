@@ -4,6 +4,11 @@
 
 This is a robust authentication API built with Express.js and MongoDB. It provides secure user registration, login with OTP (One-Time Password) verification, email verification, and password reset functionality.
 
+## Project Management
+
+For tracking the project tasks and progress, please visit our Jira board:  
+[![Jira](https://img.shields.io/badge/Jira-Project-blue)](https://aymane-bisdaoune.atlassian.net/jira/software/projects/AA/boards/7?sprintStarted=true&atlOrigin=eyJpIjoiNzRjMmQ3NGM1MDc5NDNkYmI1ZTc5MmFlMWE0ZjU1NzAiLCJwIjoiaiJ9)
+
 ## Features
 
 - User registration with email verification
