@@ -182,8 +182,91 @@ const login = async (req, res) => {
     }
 }
 
+//////////////// Request reset password method
 
-  module.exports = { register, verifyEmail, login, verifyOtp };
+const requestResetPassword =async (req,res)=>{
+
+    const {email}= req.body;
+    try{
+        const user = await User.findOne({email});
+        // verify user
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid email' });
+          }
+        // Generate and send otp
+        const otp = await requestOtp(req);
+        
+        res.status(200).json({message:"Otp sent to your email. Please check to continue password renitialisation"});
+    }
+    catch(error){
+        console.error("error requesting password reset",error)
+    }
+};
+
+///////////////// Verify otp for password
+const  verifyOtpForReset = async(req,res)=>{
+
+    const {otp} =req.body;
+    try{
+    // Check if OTP is valid and not expired
+    if (!req.session.otp || Date.now() > req.session.otpExpires) {
+        return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
+    // Check if entered OTP matches the stored one
+    if (otp != req.session.otp) {
+        return res.status(400).json({ message: 'Entered OTP is invalid' });
+    }
+    // Flag for verified otp
+    req.session.otpVerified = true; 
+    res.status(200).json({message:"You can now reset your password"});
+    }
+    catch(error){
+        console.error("error verifying otp for password reset",error)
+    }
+}
+/////////////////////// Update password
+const updatePassword = async(req,res) => {
+
+    // Updating the password
+    const { newPassword } = req.body;
+    const {userId} = req.body;
+
+    // Check if OTP is verified 
+    if (!req.session.otpVerified) {
+        return res.status(403).json({ message: 'You must verify the OTP before updating your password.' });
+    }
+
+    try{
+    const Schema = joi.object({
+        newPassword:joi.string().min(6).pattern(new RegExp("^[a-zA-Z0-9@]")).required(),
+    });
+    const result = await Schema.validate({newPassword});
+    if (result.error) {
+        return res.status(400).send({error: result.error.message});
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await User.updateOne(
+        { _id: userId }, 
+        { $set: { password: hashedPassword } } 
+    );
+
+
+    // Clear the OTP session
+    delete req.session.otp;
+    delete req.session.otpExpires;
+    delete req.session.otpVerified;
+
+    res.status(200).json({ message: 'Password has been updated successfully.' });
+    }
+
+    catch(error){
+        console.error("error updating password",error);
+    }
+}
+
+
+  module.exports = { register, verifyEmail, login, verifyOtp, requestResetPassword,verifyOtpForReset, updatePassword  };
 
 
 
