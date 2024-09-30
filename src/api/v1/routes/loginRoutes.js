@@ -10,4 +10,5 @@ router.post("/",validateLogin,login);
 // Verify Otp route
 router.post("/verify-otp",verifyOtp);
 
+
 module.exports=router;
