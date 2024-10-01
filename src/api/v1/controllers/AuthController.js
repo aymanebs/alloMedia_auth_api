@@ -265,8 +265,21 @@ const updatePassword = async(req,res) => {
     }
 }
 
+///////////////////// Logout
 
-  module.exports = { register, verifyEmail, login, verifyOtp, requestResetPassword,verifyOtpForReset, updatePassword  };
+const logout = (req, res) => {
+    try {
+
+        req.session = null;
+        res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+        console.error("Error during logout", error);
+        res.status(500).json({ message: 'Server error during logout' });
+    }
+};
+
+
+  module.exports = { register, verifyEmail, login, verifyOtp, requestResetPassword,verifyOtpForReset, updatePassword,logout  };
 
 
 
