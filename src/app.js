@@ -3,7 +3,8 @@ const path = require("path");
 const bodyParser =require("body-parser");
 const routes = require("./api/v1/routes");
 const mongodb = require("./config/database");
-const session = require("express-session")
+const session = require("express-session");
+const corsMiddleware = require("./api/v1/middlewares/corsMiddleware")
 
 //extablish connection to db
 mongodb();
@@ -19,6 +20,7 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
 }))
+app.use(corsMiddleware);
 
 
 // Attach routes
