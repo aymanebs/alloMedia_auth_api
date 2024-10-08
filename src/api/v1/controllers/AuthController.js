@@ -206,11 +206,14 @@ const requestResetPassword =async (req,res)=>{
 ///////////////// Verify otp for password
 const  verifyOtpForReset = async(req,res)=>{
 
+    const sessionOtp=req.session.otp;
+
     const {otp} =req.body;
     try{
+    console.log("otp: ",sessionOtp)
     // Check if OTP is valid and not expired
     if (!req.session.otp || Date.now() > req.session.otpExpires) {
-        return res.status(400).json({ message: 'Invalid or expired OTP' });
+        return res.status(400).json({ message:{msg:'Invalid or expired OTP',otp:sessionOtp} });
     }
 
     // Check if entered OTP matches the stored one
