@@ -1,3 +1,4 @@
+const { findOne } = require("../models/User");
 const sendOtpMail = require("../services/sendOtpMail");
 const generateOtp = require("./generateOtp");
 
@@ -17,6 +18,7 @@ const requestOtp = async (req) =>{
         // Storing the Otp in session
         req.session.otp = otp;
         req.session.otpExpires = Date.now()+300000;
+        
 
         return { success: true, message: "OTP sent in mail" };
     }

@@ -195,7 +195,8 @@ const requestResetPassword =async (req,res)=>{
           }
         // Generate and send otp
         const otp = await requestOtp(req);
-        
+        req.session.userId = user.id;
+
         res.status(200).json({message:"Otp sent to your email. Please check to continue password renitialisation"});
     }
     catch(error){
@@ -222,6 +223,7 @@ const  verifyOtpForReset = async(req,res)=>{
     }
     // Flag for verified otp
     req.session.otpVerified = true; 
+    
     res.status(200).json({message:"You can now reset your password"});
     }
     catch(error){
@@ -233,7 +235,7 @@ const updatePassword = async(req,res) => {
 
     // Updating the password
     const { newPassword } = req.body;
-    const {userId} = req.body;
+    const userId = req.session.userId;
 
     // Check if OTP is verified 
     if (!req.session.otpVerified) {
@@ -241,28 +243,28 @@ const updatePassword = async(req,res) => {
     }
 
     try{
-    const Schema = joi.object({
-    newPassword:joi.string().pattern(new RegExp("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\\W)(?!.* ).{8,16}$")).required(),
+        const Schema = joi.object({
+        newPassword:joi.string().pattern(new RegExp("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\\W)(?!.* ).{8,16}$")).required(),
+        });
+        const result = await Schema.validate({newPassword});
+        if (result.error) {
+            return res.status(400).send({error: result.error.message});
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await User.updateOne(
+            { _id: userId }, 
+            { $set: { password: hashedPassword } } 
+        );
 
 
-    });
-    const result = await Schema.validate({newPassword});
-    if (result.error) {
-        return res.status(400).send({error: result.error.message});
-    }
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await User.updateOne(
-        { _id: userId }, 
-        { $set: { password: hashedPassword } } 
-    );
+        // Clear the OTP session
+        delete req.session.otp;
+        delete req.session.otpExpires;
+        delete req.session.otpVerified;
+        delete req.session.userId;
 
 
-    // Clear the OTP session
-    delete req.session.otp;
-    delete req.session.otpExpires;
-    delete req.session.otpVerified;
-
-    res.status(200).json({ message: 'Password has been updated successfully.' });
+        res.status(200).json({ message: 'Password has been updated successfully.' });
     }
 
     catch(error){
