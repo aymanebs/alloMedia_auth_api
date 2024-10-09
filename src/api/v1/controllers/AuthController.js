@@ -41,7 +41,7 @@
                             <p style="font-size: 16px; line-height: 1.5; color: #333;">Hello ${name},</p>
                             <p style="font-size: 16px; line-height: 1.5; color: #333;">We're excited to have you on board! To get started, please verify your email address:</p>
                             <div style="text-align: center; margin: 30px 0;">
-                                <a href="http://localhost:3000/register/verify-email/${user._id}/${token}" style="display: inline-block; padding: 14px 30px; background-color: #581845; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 18px; transition: background-color 0.3s ease;">Verify My Email</a>
+                                <a href="https://localhost:3000/register/verify-email/${user._id}/${token}" style="display: inline-block; padding: 14px 30px; background-color: #581845; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 18px; transition: background-color 0.3s ease;">Verify My Email</a>
                             </div>
                             <p style="font-size: 14px; color: #666; text-align: center;">This link will expire in 24 hours for security reasons.</p>
                         </div>
