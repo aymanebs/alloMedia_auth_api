@@ -242,7 +242,9 @@ const updatePassword = async(req,res) => {
 
     try{
     const Schema = joi.object({
-        newPassword:joi.string().min(6).pattern(new RegExp("^[a-zA-Z0-9@]")).required(),
+    newPassword:joi.string().pattern(new RegExp("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\\W)(?!.* ).{8,16}$")).required(),
+
+
     });
     const result = await Schema.validate({newPassword});
     if (result.error) {
