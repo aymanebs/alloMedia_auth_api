@@ -65,7 +65,7 @@
                 });
 
 
-                return res.status(201).send(user);
+                return res.status(200).send(user);
             }
         } catch (error) {
             console.error("Error in register", error);
