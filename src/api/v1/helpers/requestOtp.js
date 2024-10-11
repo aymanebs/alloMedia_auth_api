@@ -10,6 +10,7 @@ const requestOtp = async (req) =>{
 
     try{
         // Otp generation
+        
         const otp = generateOtp();
 
         // Send Otp mail

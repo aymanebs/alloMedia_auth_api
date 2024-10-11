@@ -27,42 +27,7 @@
                 const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
                 // Send mail to user
-                sendingMail({
-                    from: process.env.EMAIL,
-                    to: email,
-                    subject: "Account Verification Link",
-                    text: `Hello, ${name}. Please verify your email.`,
-                    html: `
-                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f0f0f0;">
-                        <div style="background-color: #FFC300; color: white; padding: 20px; text-align: center;">
-                            <h1 style="margin: 0;">Welcome to Our Community!</h1>
-                        </div>
-                        <div style="background-color: #f6eaf2; padding: 20px; border-bottom: 2px solid #e0e0e0;">
-                            <p style="font-size: 16px; line-height: 1.5; color: #333;">Hello ${name},</p>
-                            <p style="font-size: 16px; line-height: 1.5; color: #333;">We're excited to have you on board! To get started, please verify your email address:</p>
-                            <div style="text-align: center; margin: 30px 0;">
-                                <a href="https://localhost:3000/register/verify-email/${user._id}/${token}" style="display: inline-block; padding: 14px 30px; background-color: #581845; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 18px; transition: background-color 0.3s ease;">Verify My Email</a>
-                            </div>
-                            <p style="font-size: 14px; color: #666; text-align: center;">This link will expire in 24 hours for security reasons.</p>
-                        </div>
-                        <div style="background-color: #f9f9f9; padding: 20px; border-bottom: 2px solid #e0e0e0;">
-                            <h2 style="color: #333; margin-top: 0;">What's Next?</h2>
-                            <ul style="color: #555; line-height: 1.6;">
-                                <li>Complete your profile</li>
-                                <li>Explore our features</li>
-                                <li>Connect with other members</li>
-                            </ul>
-                        </div>
-                        <div style="background-color: #FFC300; color: white; padding: 20px; text-align: center;">
-                            <p style="margin: 0; font-size: 14px;">If you didn't create an account, you can safely ignore this email.</p>
-                        </div>
-                        <div style="background-color: #581845; color: #fff; padding: 10px; text-align: center; font-size: 12px;">
-                            <p style="margin: 5px 0;">This is an automated message, please do not reply.</p>
-                            <p style="margin: 5px 0;">&copy; 2024 Your Company Name. All rights reserved.</p>
-                        </div>
-                    </div>
-                    `,
-                });
+            sendMailToUser(email,name,user._id,token);
 
 
                 return res.status(200).send(user);
@@ -72,6 +37,51 @@
             return res.status(500).json({ error: "Registration failed" });
         }
     };
+
+    ///////////////////Sending mail to user 
+
+    function sendMailToUser(userEmail,userName,userId,token){
+        sendingMail({
+            from: process.env.EMAIL,
+            to: userEmail,
+            subject: "Account Verification Link",
+            text: `Hello, ${userName}. Please verify your email.`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f0f0f0;">
+                <div style="background-color: #FFC300; color: white; padding: 20px; text-align: center;">
+                    <h1 style="margin: 0;">Welcome to Our Community!</h1>
+                </div>
+                <div style="background-color: #f6eaf2; padding: 20px; border-bottom: 2px solid #e0e0e0;">
+                    <p style="font-size: 16px; line-height: 1.5; color: #333;">Hello ${userName},</p>
+                    <p style="font-size: 16px; line-height: 1.5; color: #333;">We're excited to have you on board! To get started, please verify your email address:</p>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="https://localhost:3000/register/verify-email/${userId}/${token}" style="display: inline-block; padding: 14px 30px; background-color: #581845; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 18px; transition: background-color 0.3s ease;">Verify My Email</a>
+                    </div>
+                    <p style="font-size: 14px; color: #666; text-align: center;">This link will expire in 24 hours for security reasons.</p>
+                </div>
+                <div style="background-color: #f9f9f9; padding: 20px; border-bottom: 2px solid #e0e0e0;">
+                    <h2 style="color: #333; margin-top: 0;">What's Next?</h2>
+                    <ul style="color: #555; line-height: 1.6;">
+                        <li>Complete your profile</li>
+                        <li>Explore our features</li>
+                        <li>Connect with other members</li>
+                    </ul>
+                </div>
+                <div style="background-color: #FFC300; color: white; padding: 20px; text-align: center;">
+                    <p style="margin: 0; font-size: 14px;">If you didn't create an account, you can safely ignore this email.</p>
+                </div>
+                <div style="background-color: #581845; color: #fff; padding: 10px; text-align: center; font-size: 12px;">
+                    <p style="margin: 5px 0;">This is an automated message, please do not reply.</p>
+                    <p style="margin: 5px 0;">&copy; 2024 Your Company Name. All rights reserved.</p>
+                </div>
+            </div>
+            `,
+        });
+    }
+
+
+
+
 
     //////////////// Verify the email of user
 
@@ -100,10 +110,11 @@
             user.emailIsVerified = true;
             await user.save();
 
-            res.status(200).json({ message: "Email is verified successfully" });
+            res.redirect("https://localhost:5173/emailVerification?isVerified=true");
+
         } catch (error) {
             
-            res.status(400).json({ message: "Error verifying email" });
+            res.redirect("https://localhost:5173/emailVerification?isVerified=false");
         }
     };
 
@@ -135,11 +146,11 @@ const login = async (req, res) => {
       
 
       //Request otp 
-      const otp = await requestOtp(req);
+    //   const otp = await requestOtp(req);
 
       
-      // Respond with a message prompting user to enter OTP
-      res.status(200).json({ message: 'OTP has been sent to your email. Please verify to complete login.',userId:user._id });
+      // User logged in
+      res.status(200).json({ message: 'User logged in',userId:user._id });
       
 
   
@@ -211,10 +222,9 @@ const  verifyOtpForReset = async(req,res)=>{
 
     const {otp} =req.body;
     try{
-    console.log("otp: ",sessionOtp)
     // Check if OTP is valid and not expired
     if (!req.session.otp || Date.now() > req.session.otpExpires) {
-        return res.status(400).json({ message:{msg:'Invalid or expired OTP',otp:sessionOtp} });
+        return res.status(400).json({ message:'Invalid or expired OTP' });
     }
 
     // Check if entered OTP matches the stored one
