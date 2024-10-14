@@ -73,7 +73,7 @@ Before you begin, ensure you have met the following requirements:
    npm start
    ```
 
-2. The API will be available at `http://localhost:3000` (or the port you specified in the .env file).
+2. The API will be available at `https://localhost:3000` (or the port you specified in the .env file).
 
 ## API Endpoints
 

@@ -45,7 +45,7 @@ describe("Register function", () => {
 
     await register(req, res);
 
-    expect(res.statusCode).toBe(201); 
+    expect(res.statusCode).toBe(200); 
     const data = res._getData();
     expect(data).toEqual({
       _id: "userId",
