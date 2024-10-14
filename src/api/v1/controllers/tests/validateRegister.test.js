@@ -20,7 +20,7 @@ describe('Validate register inputs function',() =>{
     it("Should return next if inputs are valid",async ()=>{
         const req =httpMocks.createRequest({
             method:"Post",
-            body:{name:"Ahmad",email:"ahmad@gmail.com",password:"aA12345678",confirm_password:"aA12345678",address:"location",phone:"2128766546"}
+            body:{name:"Ahmad",email:"ahmad@gmail.com",password:"aA123!abc!",confirm_password:"aA123!abc!",address:"location",phone:"2128766546"}
         });
 
         const res =httpMocks.createResponse();
